@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { getCurrentUser } from './api'
 
 function DashboardPage() {
@@ -38,6 +39,11 @@ function DashboardPage() {
   }
 
   const suggestedDomains = ["Agriculture", "Healthcare", "Education", "Climate", "Rural Development"]
+  const stats = [
+    { label: "Searches run", value: 0 },
+    { label: "Problems saved", value: 0 },
+    { label: "Domains explored", value: 0 },
+  ]
 
   return (
     <div className="min-h-screen bg-bg">
@@ -51,7 +57,12 @@ function DashboardPage() {
         </button>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-6 py-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="max-w-4xl mx-auto px-6 py-16"
+      >
         <h1 className="text-3xl font-semibold text-text mb-2">
           Welcome, {user.email.split("@")[0]}
         </h1>
@@ -59,12 +70,14 @@ function DashboardPage() {
           Search for a domain or problem area to get started.
         </p>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
           onClick={() => navigate("/search")}
           className="bg-accent hover:bg-accent-hover text-bg font-medium px-6 py-3 rounded-md transition-colors mb-16"
         >
           Go to Search
-        </button>
+        </motion.button>
 
         {/* Suggested domains */}
         <div className="mb-16">
@@ -72,32 +85,37 @@ function DashboardPage() {
             Try a domain
           </h2>
           <div className="flex flex-wrap gap-2">
-            {suggestedDomains.map((domain) => (
-              <button
+            {suggestedDomains.map((domain, i) => (
+              <motion.button
                 key={domain}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.2 + i * 0.05 }}
+                whileHover={{ scale: 1.05, borderColor: "var(--color-accent)" }}
                 onClick={() => navigate("/search")}
-                className="border border-border hover:border-accent text-text text-sm px-4 py-2 rounded-full transition-colors"
+                className="border border-border text-text text-sm px-4 py-2 rounded-full transition-colors"
               >
                 {domain}
-              </button>
+              </motion.button>
             ))}
           </div>
         </div>
 
         {/* Stats row */}
         <div className="grid grid-cols-3 gap-4 mb-16">
-          <div className="border border-border rounded-lg p-5">
-            <p className="text-2xl font-semibold text-text mb-1">0</p>
-            <p className="text-sm text-text-muted">Searches run</p>
-          </div>
-          <div className="border border-border rounded-lg p-5">
-            <p className="text-2xl font-semibold text-text mb-1">0</p>
-            <p className="text-sm text-text-muted">Problems saved</p>
-          </div>
-          <div className="border border-border rounded-lg p-5">
-            <p className="text-2xl font-semibold text-text mb-1">0</p>
-            <p className="text-sm text-text-muted">Domains explored</p>
-          </div>
+          {stats.map((stat, i) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.3 + i * 0.1 }}
+              whileHover={{ y: -3, borderColor: "var(--color-accent)" }}
+              className="border border-border rounded-lg p-5"
+            >
+              <p className="text-2xl font-semibold text-text mb-1">{stat.value}</p>
+              <p className="text-sm text-text-muted">{stat.label}</p>
+            </motion.div>
+          ))}
         </div>
 
         {/* Empty state for recent activity */}
@@ -111,7 +129,7 @@ function DashboardPage() {
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

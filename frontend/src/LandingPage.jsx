@@ -1,12 +1,24 @@
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 
 function LandingPage() {
   const navigate = useNavigate()
 
+  const steps = [
+    { num: "01", title: "Search a domain", desc: "Enter an industry or topic — agriculture, healthcare, education, anything you want to explore." },
+    { num: "02", title: "We gather evidence", desc: "News, research papers, forums, and open datasets are collected and cross-referenced for recurring patterns." },
+    { num: "03", title: "Discover real problems", desc: "Get ranked, evidence-backed problems with sources, severity, and potential opportunity areas." },
+  ]
+
   return (
     <div className="min-h-screen bg-bg">
       {/* Hero */}
-      <div className="flex flex-col items-center justify-center px-6 pt-24 pb-20 text-center">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="flex flex-col items-center justify-center px-6 pt-24 pb-20 text-center"
+      >
         <span className="inline-block text-xs tracking-widest uppercase text-accent border border-accent/30 rounded-full px-3 py-1 mb-6">
           AI-Powered Problem Discovery
         </span>
@@ -21,70 +33,94 @@ function LandingPage() {
         </p>
 
         <div className="flex items-center justify-center gap-3">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => navigate("/register")}
             className="bg-accent hover:bg-accent-hover text-bg font-medium px-6 py-3 rounded-md transition-colors"
           >
             Get Started
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
             onClick={() => navigate("/login")}
             className="border border-border hover:border-accent text-text px-6 py-3 rounded-md transition-colors"
           >
             Log In
-          </button>
+          </motion.button>
         </div>
-      </div>
+      </motion.div>
 
       {/* How it works */}
       <div className="max-w-5xl mx-auto px-6 py-20 border-t border-border">
-        <h2 className="text-2xl font-semibold text-text text-center mb-2">
+        <motion.h2
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-2xl font-semibold text-text text-center mb-2"
+        >
           How it works
-        </h2>
-        <p className="text-text-muted text-center mb-14">
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-text-muted text-center mb-14"
+        >
           From a single search term to evidence-backed problems worth solving.
-        </p>
+        </motion.p>
 
         <div className="grid md:grid-cols-3 gap-8">
-          <div className="border border-border rounded-lg p-6">
-            <span className="text-accent text-sm font-mono mb-3 block">01</span>
-            <h3 className="text-text font-medium mb-2">Search a domain</h3>
-            <p className="text-text-muted text-sm leading-relaxed">
-              Enter an industry or topic — agriculture, healthcare, education,
-              anything you want to explore.
-            </p>
-          </div>
-
-          <div className="border border-border rounded-lg p-6">
-            <span className="text-accent text-sm font-mono mb-3 block">02</span>
-            <h3 className="text-text font-medium mb-2">We gather evidence</h3>
-            <p className="text-text-muted text-sm leading-relaxed">
-              News, research papers, forums, and open datasets are collected
-              and cross-referenced for recurring patterns.
-            </p>
-          </div>
-
-          <div className="border border-border rounded-lg p-6">
-            <span className="text-accent text-sm font-mono mb-3 block">03</span>
-            <h3 className="text-text font-medium mb-2">Discover real problems</h3>
-            <p className="text-text-muted text-sm leading-relaxed">
-              Get ranked, evidence-backed problems with sources, severity,
-              and potential opportunity areas.
-            </p>
-          </div>
+          {steps.map((step, i) => (
+            <motion.div
+              key={step.num}
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.15 }}
+              whileHover={{ y: -4, borderColor: "var(--color-accent)" }}
+              className="border border-border rounded-lg p-6"
+            >
+              <span className="text-accent text-sm font-mono mb-3 block">{step.num}</span>
+              <h3 className="text-text font-medium mb-2">{step.title}</h3>
+              <p className="text-text-muted text-sm leading-relaxed">{step.desc}</p>
+            </motion.div>
+          ))}
         </div>
       </div>
 
       {/* Sample problem preview */}
       <div className="max-w-3xl mx-auto px-6 py-20 border-t border-border">
-        <h2 className="text-2xl font-semibold text-text text-center mb-2">
+        <motion.h2
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-2xl font-semibold text-text text-center mb-2"
+        >
           What you'll find
-        </h2>
-        <p className="text-text-muted text-center mb-10">
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-text-muted text-center mb-10"
+        >
           A preview of how a discovered problem looks.
-        </p>
+        </motion.p>
 
-        <div className="bg-surface border border-border rounded-lg p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 25 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          whileHover={{ y: -4, borderColor: "var(--color-accent)" }}
+          className="bg-surface border border-border rounded-lg p-6"
+        >
           <span className="inline-block text-xs tracking-widest uppercase text-accent mb-3">
             Agriculture
           </span>
@@ -103,20 +139,28 @@ function LandingPage() {
             <span>•</span>
             <span>82% confidence</span>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Footer CTA */}
       <div className="border-t border-border px-6 py-16 text-center">
-        <h2 className="text-2xl font-semibold text-text mb-6">
+        <motion.h2
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-2xl font-semibold text-text mb-6"
+        >
           Start discovering problems worth solving.
-        </h2>
-        <button
+        </motion.h2>
+        <motion.button
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
           onClick={() => navigate("/register")}
           className="bg-accent hover:bg-accent-hover text-bg font-medium px-6 py-3 rounded-md transition-colors"
         >
           Get Started — It's Free
-        </button>
+        </motion.button>
       </div>
     </div>
   )

@@ -1,89 +1,145 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { searchProblems } from './api'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { searchProblems } from "./api";
+
+function getSeverityStyles(severity) {
+  switch (severity) {
+    case "High":
+      return "bg-red-500/10 text-red-400 border-red-500/30";
+    case "Medium":
+      return "bg-yellow-500/10 text-yellow-400 border-yellow-500/30";
+    case "Low":
+    default:
+      return "bg-gray-500/10 text-gray-400 border-gray-500/30";
+  }
+}
 
 function SearchPage() {
-  const [query, setQuery] = useState("")
-  const [result, setResult] = useState(null)
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
+  const [query, setQuery] = useState("");
+  const [problems, setProblems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleSearch = async (e) => {
-    e.preventDefault()
-    setError("")
-    setResult(null)
-
-    const token = localStorage.getItem("token")
+  const handleSearch = async () => {
+    const token = localStorage.getItem("token");
     if (!token) {
-      navigate("/login")
-      return
+      navigate("/login");
+      return;
     }
 
-    if (!query) {
-      setError("Please enter something to search for.")
-      return
+    if (!query.trim()) return;
+
+    setLoading(true);
+    setError("");
+    setProblems([]);
+
+    const result = await searchProblems(query, token);
+
+    setLoading(false);
+
+    if (result.error) {
+      setError(
+        typeof result.error === "string"
+          ? result.error
+          : "Something went wrong. Please try again."
+      );
+      return;
     }
 
-    setLoading(true)
-    const response = await searchProblems(query, token)
-    setLoading(false)
-
-    if (response.status === "received") {
-      setResult(response)
-    } else {
-      setError("Something went wrong. Please try again.")
-    }
-  }
+    setProblems(result.problems || []);
+  };
 
   return (
-    <div className="min-h-screen bg-bg">
-      <nav className="border-b border-border px-6 py-4 flex items-center justify-between">
-        <span className="text-text font-semibold">Reverse Engine</span>
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="text-sm text-text-muted hover:text-text transition-colors"
-        >
-          Back to Dashboard
-        </button>
-      </nav>
+    <div className="min-h-screen bg-bg text-text px-6 py-12">
+      <div className="max-w-3xl mx-auto">
+        <h1 className="text-3xl font-bold mb-6">Search for Problems</h1>
 
-      <div className="max-w-2xl mx-auto px-6 py-16">
-        <h1 className="text-3xl font-semibold text-text mb-2">Search</h1>
-        <p className="text-text-muted mb-8">
-          Search for a domain, industry, or problem area.
-        </p>
-
-        <form onSubmit={handleSearch} className="flex gap-2 mb-6">
+        <div className="flex gap-3 mb-8">
           <input
             type="text"
-            placeholder="e.g. Agriculture, Healthcare, Education"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="flex-1 bg-surface border border-border rounded-md px-3 py-2.5 text-text focus:outline-none focus:border-accent transition-colors"
+            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+            placeholder="e.g. Agriculture, Healthcare, Climate..."
+            className="flex-1 bg-surface border border-border rounded-lg px-4 py-3 text-text placeholder-text-muted focus:outline-none focus:border-accent"
           />
           <button
-            type="submit"
+            onClick={handleSearch}
             disabled={loading}
-            className="bg-accent hover:bg-accent-hover text-bg font-medium px-6 py-2.5 rounded-md transition-colors disabled:opacity-50"
+            className="bg-accent hover:bg-accent-hover text-bg font-semibold px-6 py-3 rounded-lg disabled:opacity-50"
           >
             {loading ? "Searching..." : "Search"}
           </button>
-        </form>
+        </div>
 
-        {error && <p className="text-sm text-red-400 mb-4">{error}</p>}
+        {error && <p className="text-accent mb-6">{error}</p>}
 
-        {result && (
-          <div className="bg-surface border border-border rounded-lg p-5">
-            <span className="inline-block text-xs tracking-widest uppercase text-accent mb-2">
-              {result.query}
-            </span>
-            <p className="text-text-muted">{result.message}</p>
-          </div>
+        <div className="flex flex-col gap-4">
+          {problems.map((problem, i) => (
+            <motion.div
+              key={problem.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.05 }}
+              className="bg-surface border border-border rounded-lg p-5"
+            >
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <h2 className="text-lg font-semibold text-text">{problem.title}</h2>
+                <div className="flex shrink-0 gap-2">
+                  {problem.severity && (
+                    <span
+                      className={`text-xs border rounded-full px-3 py-1 ${getSeverityStyles(
+                        problem.severity
+                      )}`}
+                    >
+                      {problem.severity}
+                    </span>
+                  )}
+                  <span className="text-xs bg-accent/10 text-accent border border-accent/30 rounded-full px-3 py-1">
+                    {problem.article_count} source{problem.article_count !== 1 ? "s" : ""}
+                  </span>
+                </div>
+              </div>
+
+              {problem.summary && (
+                <p className="text-text-muted text-sm mb-4 italic">
+                  {problem.summary}
+                </p>
+              )}
+
+              <div className="flex flex-col gap-2">
+                {problem.articles.map((article) => (
+                  <a
+                    key={article.id}
+                    href={article.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block border border-border rounded-lg p-3 hover:border-accent transition"
+                  >
+                    {article.description && (
+                      <p className="text-text-muted text-sm mb-2">{article.description}</p>
+                    )}
+                    <div className="text-xs text-text-muted">
+                      {article.source} ·{" "}
+                      {article.published_at && new Date(article.published_at).toLocaleDateString()}
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {!loading && problems.length === 0 && !error && (
+          <p className="text-text-muted">
+            Search a domain or industry to see real, recent problem signals.
+          </p>
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default SearchPage
+export default SearchPage;
