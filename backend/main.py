@@ -15,40 +15,124 @@ from dotenv import load_dotenv
 import json
 import time
 import re
+
+
+# =========================================================
+# DATABASE
+# =========================================================
+
 Base.metadata.create_all(bind=engine)
+
+
+# =========================================================
+# FASTAPI APP
+# =========================================================
 
 app = FastAPI()
 
+
+# =========================================================
+# CORS
+# =========================================================
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "https://reverse-engine.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# =========================================================
+# PASSWORD HASHING
+# =========================================================
+
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
+
+
+def prepare_password(password: str) -> str:
+    """
+    Bcrypt supports a maximum of 72 bytes.
+
+    Prepare the password consistently for both
+    registration and login.
+    """
+
+    password_bytes = password.encode("utf-8")
+
+    if len(password_bytes) <= 72:
+        return password
+
+    return password_bytes[:72].decode(
+        "utf-8",
+        errors="ignore"
+    )
+
+
+# =========================================================
+# GEMINI
+# =========================================================
+
 load_dotenv()
+
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-client = genai.Client(api_key=GEMINI_API_KEY)
+client = genai.Client(
+    api_key=GEMINI_API_KEY
+)
 
+
+# =========================================================
+# DATABASE SESSION
+# =========================================================
 
 def get_db():
     db = SessionLocal()
+
     try:
         yield db
+
     finally:
         db.close()
 
 
-@app.post("/register")
-def register(user: UserCreate, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter(User.email == user.email).first()
-    if existing_user:
-        return {"error": "Email already registered"}
+# =========================================================
+# REGISTER
+# =========================================================
 
-    hashed_password = pwd_context.hash(user.password)
+@app.post("/register")
+def register(
+    user: UserCreate,
+    db: Session = Depends(get_db)
+):
+
+    existing_user = (
+        db.query(User)
+        .filter(User.email == user.email)
+        .first()
+    )
+
+    if existing_user:
+        return {
+            "error": "Email already registered"
+        }
+
+    prepared_password = prepare_password(
+        user.password
+    )
+
+    hashed_password = pwd_context.hash(
+        prepared_password
+    )
+
     new_user = User(
         username=user.username,
         email=user.email,
@@ -59,36 +143,99 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return {"message": "User registered successfully", "user_id": new_user.id}
+    return {
+        "message": "User registered successfully",
+        "user_id": new_user.id
+    }
 
+
+# =========================================================
+# LOGIN
+# =========================================================
 
 @app.post("/login")
-def login(user: UserLogin, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.email == user.email).first()
+def login(
+    user: UserLogin,
+    db: Session = Depends(get_db)
+):
 
-    if not db_user or not pwd_context.verify(user.password, db_user.hashed_password):
-        return {"error": "Invalid email or password"}
+    db_user = (
+        db.query(User)
+        .filter(User.email == user.email)
+        .first()
+    )
 
-    access_token = create_access_token(data={"sub": db_user.email})
-    return {"access_token": access_token, "token_type": "bearer"}
+    if not db_user:
+        return {
+            "error": "Invalid email or password"
+        }
 
+    prepared_password = prepare_password(
+        user.password
+    )
+
+    if not pwd_context.verify(
+        prepared_password,
+        db_user.hashed_password
+    ):
+        return {
+            "error": "Invalid email or password"
+        }
+
+    access_token = create_access_token(
+        data={"sub": db_user.email}
+    )
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }
+
+
+# =========================================================
+# CURRENT USER
+# =========================================================
 
 @app.get("/me")
-def read_current_user(current_user: str = Depends(get_current_user)):
-    return {"email": current_user}
+def read_current_user(
+    current_user: str = Depends(get_current_user)
+):
 
+    return {
+        "email": current_user
+    }
+
+
+# =========================================================
+# SEARCH
+# =========================================================
 
 @app.post("/search")
-def search(query: dict, current_user: str = Depends(get_current_user), db: Session = Depends(get_db)):
+def search(
+    query: dict,
+    current_user: str = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
     search_term = query["query"]
 
     news_articles = fetch_news(search_term)
+
     hn_articles = fetch_hackernews(search_term)
 
-    all_articles = news_articles + hn_articles
-    group_into_problems(search_term, db)
+    all_articles = (
+        news_articles + hn_articles
+    )
 
-    problems = get_problems_with_articles(search_term, db)
+    group_into_problems(
+        search_term,
+        db
+    )
+
+    problems = get_problems_with_articles(
+        search_term,
+        db
+    )
 
     return {
         "query": search_term,
@@ -97,42 +244,70 @@ def search(query: dict, current_user: str = Depends(get_current_user), db: Sessi
         "problems": problems
     }
 
+
+# =========================================================
+# CHAT
+# =========================================================
+
 @app.post("/chat")
 def chat(
     query: dict,
     current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+
     message = query.get("message")
 
     if not message:
-        return {"error": "Message is required"}
+        return {
+            "error": "Message is required"
+        }
 
-    history = query.get("history", [])
+    history = query.get(
+        "history",
+        []
+    )
 
     conversation_context = ""
 
     for item in history[-10:]:
-        role = "User" if item.get("role") == "user" else "Reverse AI"
-        text = item.get("text", "")
 
-        conversation_context += f"{role}: {text}\n"
+        role = (
+            "User"
+            if item.get("role") == "user"
+            else "Reverse AI"
+        )
+
+        text = item.get(
+            "text",
+            ""
+        )
+
+        conversation_context += (
+            f"{role}: {text}\n"
+        )
+
 
     problems = (
         db.query(Problem)
-        .order_by(Problem.severity_score.desc())
+        .order_by(
+            Problem.severity_score.desc()
+        )
         .limit(15)
         .all()
     )
 
+
     problem_context = ""
 
     for problem in problems:
+
         problem_context += f"""
 Problem: {problem.title}
 Severity: {problem.severity_score}
 Summary: {problem.summary or "No summary available"}
 """
+
 
     prompt = f"""
 You are Reverse Engine AI, an AI assistant for discovering and analyzing
@@ -159,7 +334,9 @@ Instructions:
 - Keep the answer concise but useful.
 """
 
+
     try:
+
         response = client.models.generate_content(
             model="gemini-3.6-flash",
             contents=prompt
@@ -170,28 +347,51 @@ Instructions:
         }
 
     except Exception as e:
-        print(f"Chat error: {e}")
+
+        print(
+            f"Chat error: {e}"
+        )
 
         return {
             "error": "AI response failed"
         }
+
+
+# =========================================================
+# ANALYZE STARTUP OPPORTUNITY
+# =========================================================
+
 @app.post("/analyze-opportunity")
 def analyze_opportunity(
     query: dict,
     current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    problem_id = query.get("problem_id")
+
+    problem_id = query.get(
+        "problem_id"
+    )
 
     if not problem_id:
-        return {"error": "Problem ID is required"}
+        return {
+            "error": "Problem ID is required"
+        }
 
-    problem = db.query(Problem).filter(
-        Problem.id == problem_id
-    ).first()
+
+    problem = (
+        db.query(Problem)
+        .filter(
+            Problem.id == problem_id
+        )
+        .first()
+    )
+
 
     if not problem:
-        return {"error": "Problem not found"}
+        return {
+            "error": "Problem not found"
+        }
+
 
     prompt = f"""
 You are Reverse Engine AI's Startup Opportunity Engine.
@@ -228,76 +428,131 @@ Rules:
 - Keep each answer concise.
 """
 
+
     # Try Gemini up to 3 times if it temporarily returns 503
+
     for attempt in range(3):
 
         try:
+
             response = client.models.generate_content(
                 model="gemini-3.6-flash",
                 contents=prompt
             )
 
-            response_text = response.text.strip()
+            response_text = (
+                response.text.strip()
+            )
+
 
             if response_text.startswith("```"):
-                response_text = response_text.replace("```json", "")
-                response_text = response_text.replace("```", "")
-                response_text = response_text.strip()
+
+                response_text = (
+                    response_text
+                    .replace("```json", "")
+                    .replace("```", "")
+                    .strip()
+                )
+
 
             start = response_text.find("{")
+
             end = response_text.rfind("}")
 
+
             if start == -1 or end == -1:
+
                 return {
                     "error": "AI did not return valid JSON"
                 }
 
-            response_text = response_text[start:end + 1]
 
-            analysis = json.loads(response_text)
+            response_text = response_text[
+                start:end + 1
+            ]
+
+
+            analysis = json.loads(
+                response_text
+            )
+
 
             return {
                 "analysis": analysis
             }
+
 
         except Exception as e:
 
             error_message = str(e)
 
             print(
-                f"Opportunity analysis attempt {attempt + 1} failed: "
+                f"Opportunity analysis attempt "
+                f"{attempt + 1} failed: "
                 f"{error_message}"
             )
 
+
             # Gemini temporary overload / unavailable
-            if "503" in error_message and attempt < 2:
+
+            if (
+                "503" in error_message
+                and attempt < 2
+            ):
+
                 time.sleep(3)
+
                 continue
+
 
             return {
                 "error": error_message
             }
 
+
     return {
-        "error": "Gemini is temporarily unavailable. Please try again."
+        "error": (
+            "Gemini is temporarily unavailable. "
+            "Please try again."
+        )
     }
+
+
+# =========================================================
+# ASSESS NOVELTY
+# =========================================================
+
 @app.post("/assess-novelty")
 def assess_novelty(
     query: dict,
     current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    problem_id = query.get("problem_id")
+
+    problem_id = query.get(
+        "problem_id"
+    )
 
     if not problem_id:
-        return {"error": "Problem ID is required"}
+        return {
+            "error": "Problem ID is required"
+        }
 
-    problem = db.query(Problem).filter(
-        Problem.id == problem_id
-    ).first()
+
+    problem = (
+        db.query(Problem)
+        .filter(
+            Problem.id == problem_id
+        )
+        .first()
+    )
+
 
     if not problem:
-        return {"error": "Problem not found"}
+        return {
+            "error": "Problem not found"
+        }
+
 
     prompt = f"""
 You are Reverse Engine AI's AI-based Novelty Assessment Engine.
@@ -330,103 +585,225 @@ Rules:
 - Return JSON only.
 """
 
+
     try:
+
         response = client.models.generate_content(
             model="gemini-3.6-flash",
             contents=prompt
         )
 
-        response_text = response.text.strip()
+
+        response_text = (
+            response.text.strip()
+        )
+
 
         if response_text.startswith("```"):
-            response_text = response_text.replace("```json", "")
-            response_text = response_text.replace("```", "")
-            response_text = response_text.strip()
+
+            response_text = (
+                response_text
+                .replace("```json", "")
+                .replace("```", "")
+                .strip()
+            )
+
 
         start = response_text.find("{")
+
         end = response_text.rfind("}")
 
+
         if start == -1 or end == -1:
-            return {"error": "AI did not return valid JSON"}
 
-        response_text = response_text[start:end + 1]
+            return {
+                "error": "AI did not return valid JSON"
+            }
 
-        novelty = json.loads(response_text)
+
+        response_text = response_text[
+            start:end + 1
+        ]
+
+
+        novelty = json.loads(
+            response_text
+        )
+
 
         return {
             "novelty": novelty
         }
 
+
     except Exception as e:
-        print(f"Novelty assessment error: {e}")
+
+        print(
+            f"Novelty assessment error: {e}"
+        )
 
         return {
             "error": str(e)
         }
+
+
+# =========================================================
+# PROBLEM RELATIONSHIP MAP
+# =========================================================
+
 @app.post("/problem-relationships")
 def problem_relationships(
     query: dict,
     current_user: str = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    problem_id = query.get("problem_id")
+
+    problem_id = query.get(
+        "problem_id"
+    )
 
     if not problem_id:
-        return {"error": "Problem ID is required"}
+        return {
+            "error": "Problem ID is required"
+        }
 
-    current_problem = db.query(Problem).filter(
-        Problem.id == problem_id
-    ).first()
+
+    current_problem = (
+        db.query(Problem)
+        .filter(
+            Problem.id == problem_id
+        )
+        .first()
+    )
+
 
     if not current_problem:
-        return {"error": "Problem not found"}
+        return {
+            "error": "Problem not found"
+        }
+
 
     stop_words = {
-        "the", "and", "for", "with", "from", "that",
-        "this", "are", "was", "were", "has", "have",
-        "into", "their", "about", "problem", "issues",
-        "issue", "using", "used", "through", "between",
-        "where", "which", "will", "can", "more", "than"
+        "the",
+        "and",
+        "for",
+        "with",
+        "from",
+        "that",
+        "this",
+        "are",
+        "was",
+        "were",
+        "has",
+        "have",
+        "into",
+        "their",
+        "about",
+        "problem",
+        "issues",
+        "issue",
+        "using",
+        "used",
+        "through",
+        "between",
+        "where",
+        "which",
+        "will",
+        "can",
+        "more",
+        "than"
     }
 
+
     def get_words(problem):
-        text = f"{problem.title or ''} {problem.summary or ''}"
-        words = re.findall(r"[a-zA-Z]{4,}", text.lower())
-        return set(word for word in words if word not in stop_words)
 
-    current_words = get_words(current_problem)
+        text = (
+            f"{problem.title or ''} "
+            f"{problem.summary or ''}"
+        )
 
-    all_problems = db.query(Problem).filter(
-        Problem.id != problem_id
-    ).all()
+        words = re.findall(
+            r"[a-zA-Z]{4,}",
+            text.lower()
+        )
+
+        return set(
+            word
+            for word in words
+            if word not in stop_words
+        )
+
+
+    current_words = get_words(
+        current_problem
+    )
+
+
+    all_problems = (
+        db.query(Problem)
+        .filter(
+            Problem.id != problem_id
+        )
+        .all()
+    )
+
 
     relationships = []
 
+
     for problem in all_problems:
 
-        problem_words = get_words(problem)
+        problem_words = get_words(
+            problem
+        )
 
-        if not current_words or not problem_words:
+
+        if (
+            not current_words
+            or not problem_words
+        ):
+
             similarity = 0
+
         else:
-            common_words = current_words.intersection(problem_words)
-            total_words = current_words.union(problem_words)
 
-            similarity = len(common_words) / len(total_words)
+            common_words = (
+                current_words
+                .intersection(problem_words)
+            )
 
-        # Give a small boost when both problems came from the same query
+            total_words = (
+                current_words
+                .union(problem_words)
+            )
+
+            similarity = (
+                len(common_words)
+                / len(total_words)
+            )
+
+
+        # Give a small boost when both
+        # problems came from the same query
+
         if (
             current_problem.query
             and problem.query
-            and current_problem.query.lower() == problem.query.lower()
+            and current_problem.query.lower()
+            == problem.query.lower()
         ):
+
             similarity += 0.15
+
 
         if similarity >= 0.08:
 
             relationships.append({
+
                 "id": problem.id,
+
                 "title": problem.title,
+
                 "severity": (
                     "High"
                     if problem.severity_score >= 25
@@ -434,21 +811,33 @@ def problem_relationships(
                     if problem.severity_score >= 12
                     else "Low"
                 ),
+
                 "summary": problem.summary,
-                "similarity": round(min(similarity, 1) * 100)
+
+                "similarity": round(
+                    min(similarity, 1) * 100
+                )
+
             })
+
 
     relationships.sort(
         key=lambda x: x["similarity"],
         reverse=True
     )
 
+
     relationships = relationships[:8]
 
+
     return {
+
         "problem": {
+
             "id": current_problem.id,
+
             "title": current_problem.title,
+
             "severity": (
                 "High"
                 if current_problem.severity_score >= 25
@@ -456,7 +845,11 @@ def problem_relationships(
                 if current_problem.severity_score >= 12
                 else "Low"
             ),
+
             "summary": current_problem.summary
+
         },
+
         "relationships": relationships
+
     }

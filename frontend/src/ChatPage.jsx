@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "./api";
 
 const formatAIResponse = (text) => {
   if (!text) return null;
@@ -24,7 +25,6 @@ const formatAIResponse = (text) => {
 
   return (
     <div className="re-ai-response">
-
       {intro && (
         <div className="re-ai-intro">
           {intro}
@@ -71,13 +71,11 @@ const formatAIResponse = (text) => {
 
         return (
           <div className="re-problem-card" key={index}>
-
             <div className="re-problem-number">
               {String(index + 1).padStart(2, "0")}
             </div>
 
             <div className="re-problem-content">
-
               <div className="re-problem-top">
                 <h3>{title}</h3>
 
@@ -110,7 +108,6 @@ const formatAIResponse = (text) => {
                   ))}
                 </div>
               )}
-
             </div>
           </div>
         );
@@ -126,8 +123,8 @@ function ChatPage() {
     {
       role: "ai",
       text:
-        "Hi! I'm Reverse Engine AI. Tell me about a problem, industry, or idea you want to explore."
-    }
+        "Hi! I'm Reverse Engine AI. Tell me about a problem, industry, or idea you want to explore.",
+    },
   ]);
 
   const [input, setInput] = useState("");
@@ -142,8 +139,8 @@ function ChatPage() {
       ...prev,
       {
         role: "user",
-        text: userMessage
-      }
+        text: userMessage,
+      },
     ]);
 
     setInput("");
@@ -152,38 +149,43 @@ function ChatPage() {
     try {
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://127.0.0.1:8000/chat", {
+      const response = await fetch(`${API_URL}/chat`, {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
+
         body: JSON.stringify({
           message: userMessage,
-          history: messages
-        })
+          history: messages,
+        }),
       });
 
       const data = await response.json();
 
       if (!response.ok || data.error) {
-        throw new Error(data.error || "Something went wrong");
+        throw new Error(
+          data.error || "Something went wrong"
+        );
       }
 
       setMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          text: data.response
-        }
+          text: data.response,
+        },
       ]);
     } catch (error) {
       setMessages((prev) => [
         ...prev,
         {
           role: "ai",
-          text: "Sorry, I couldn't connect to the AI right now."
-        }
+          text:
+            "Sorry, I couldn't connect to the AI right now.",
+        },
       ]);
     } finally {
       setLoading(false);
@@ -201,8 +203,8 @@ function ChatPage() {
     <div className="re-chat-page">
 
       {/* NAVBAR */}
-      <nav className="re-chat-nav">
 
+      <nav className="re-chat-nav">
         <div className="re-chat-logo">
           REVERSE<span> ENGINE</span>
         </div>
@@ -213,15 +215,15 @@ function ChatPage() {
         >
           DASHBOARD →
         </button>
-
       </nav>
 
       {/* MAIN */}
+
       <main className="re-chat-main">
 
         {/* HEADER */}
-        <div className="re-chat-header">
 
+        <div className="re-chat-header">
           <div className="re-chat-eyebrow">
             <span className="re-chat-dot"></span>
             AI DISCOVERY CORE
@@ -234,16 +236,15 @@ function ChatPage() {
           <p>
             Explore problems, industries and startup opportunities.
           </p>
-
         </div>
 
         {/* CHAT BOX */}
+
         <div className="re-chat-container">
 
           <div className="re-chat-messages">
 
             {messages.map((message, index) => (
-
               <div
                 key={index}
                 className={`re-message-row ${
@@ -266,7 +267,6 @@ function ChatPage() {
                       : "re-ai-message"
                   }
                 >
-
                   {message.role === "ai"
                     ? formatAIResponse(message.text)
                     : (
@@ -274,14 +274,13 @@ function ChatPage() {
                         {message.text}
                       </div>
                     )}
-
                 </div>
 
               </div>
-
             ))}
 
             {/* LOADING */}
+
             {loading && (
               <div className="re-message-row re-message-ai">
 
@@ -290,13 +289,13 @@ function ChatPage() {
                 </div>
 
                 <div className="re-ai-message re-thinking">
-
                   <span></span>
                   <span></span>
                   <span></span>
 
-                  <p>Reverse AI is thinking...</p>
-
+                  <p>
+                    Reverse AI is thinking...
+                  </p>
                 </div>
 
               </div>
@@ -305,11 +304,14 @@ function ChatPage() {
           </div>
 
           {/* INPUT */}
+
           <div className="re-chat-input-area">
 
             <textarea
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) =>
+                setInput(e.target.value)
+              }
               onKeyDown={handleKeyDown}
               placeholder="Ask Reverse AI anything..."
               rows="1"

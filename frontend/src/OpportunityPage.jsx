@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { API_URL } from "./api";
 
 function OpportunityPage() {
   const location = useLocation();
@@ -18,9 +19,16 @@ function OpportunityPage() {
   const [noveltyLoading, setNoveltyLoading] = useState(false);
   const [novelty, setNovelty] = useState(null);
 
-  const [relationshipLoading, setRelationshipLoading] = useState(false);
+  const [relationshipLoading, setRelationshipLoading] =
+    useState(false);
   const [relationships, setRelationships] = useState(null);
 
+  // =========================================================
+  // SCROLL REFERENCES
+  // =========================================================
+
+  const noveltyRef = useRef(null);
+  const relationshipRef = useRef(null);
 
   // =========================================================
   // ANALYZE STARTUP OPPORTUNITY
@@ -36,7 +44,7 @@ function OpportunityPage() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://127.0.0.1:8000/analyze-opportunity",
+        `${API_URL}/analyze-opportunity`,
         {
           method: "POST",
 
@@ -76,7 +84,6 @@ function OpportunityPage() {
     }
   };
 
-
   // =========================================================
   // ASSESS NOVELTY
   // =========================================================
@@ -91,7 +98,7 @@ function OpportunityPage() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://127.0.0.1:8000/assess-novelty",
+        `${API_URL}/assess-novelty`,
         {
           method: "POST",
 
@@ -117,6 +124,14 @@ function OpportunityPage() {
 
       setNovelty(data.novelty);
 
+      // Automatically scroll to novelty result
+      setTimeout(() => {
+        noveltyRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+
     } catch (err) {
       console.error(
         "Novelty assessment error:",
@@ -133,7 +148,6 @@ function OpportunityPage() {
     }
   };
 
-
   // =========================================================
   // PROBLEM RELATIONSHIP MAP
   // =========================================================
@@ -148,7 +162,7 @@ function OpportunityPage() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://127.0.0.1:8000/problem-relationships",
+        `${API_URL}/problem-relationships`,
         {
           method: "POST",
 
@@ -174,6 +188,14 @@ function OpportunityPage() {
 
       setRelationships(data);
 
+      // Automatically scroll to relationship result
+      setTimeout(() => {
+        relationshipRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }, 100);
+
     } catch (err) {
       console.error(
         "Relationship map error:",
@@ -189,7 +211,6 @@ function OpportunityPage() {
       setRelationshipLoading(false);
     }
   };
-
 
   // =========================================================
   // PROBLEM NOT FOUND
@@ -216,7 +237,6 @@ function OpportunityPage() {
       </div>
     );
   }
-
 
   // =========================================================
   // MAIN PAGE
@@ -572,7 +592,10 @@ function OpportunityPage() {
            ===================================================== */}
 
         {novelty && (
-          <div className="re-novelty-panel">
+          <div
+            className="re-novelty-panel"
+            ref={noveltyRef}
+          >
 
             {/* HEADER */}
 
@@ -701,7 +724,10 @@ function OpportunityPage() {
            ===================================================== */}
 
         {relationships && (
-          <div className="re-relationship-panel">
+          <div
+            className="re-relationship-panel"
+            ref={relationshipRef}
+          >
 
             {/* HEADER */}
 
