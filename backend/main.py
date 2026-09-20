@@ -42,11 +42,11 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "https://reverse-engine.vercel.app",
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # =========================================================
 # PASSWORD HASHING
