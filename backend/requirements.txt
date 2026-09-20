@@ -7,3 +7,4 @@ requests
 thefuzz
 google-genai
 email-validator
+bcrypt==4.0.1
