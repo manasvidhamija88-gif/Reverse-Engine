@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
+
 from grouping import group_into_problems, get_problems_with_articles
 from auth import create_access_token, get_current_user
 from database import SessionLocal, engine
@@ -9,12 +9,16 @@ from models import Base, User, Problem
 from schemas import UserCreate, UserLogin
 from collectors.news import fetch_news
 from collectors.hackernews import fetch_hackernews
+
 import os
-from google import genai
-from dotenv import load_dotenv
 import json
 import time
 import re
+import hashlib
+import bcrypt
+
+from google import genai
+from dotenv import load_dotenv
 
 
 # =========================================================
@@ -48,34 +52,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# =========================================================
-# PASSWORD HASHING
-# =========================================================
-
-pwd_context = CryptContext(
-    schemes=["bcrypt"],
-    deprecated="auto"
-)
-
-
-def prepare_password(password: str) -> str:
-    """
-    Bcrypt supports a maximum of 72 bytes.
-
-    Prepare the password consistently for both
-    registration and login.
-    """
-
-    password_bytes = password.encode("utf-8")
-
-    if len(password_bytes) <= 72:
-        return password
-
-    return password_bytes[:72].decode(
-        "utf-8",
-        errors="ignore"
-    )
-
 
 # =========================================================
 # GEMINI
@@ -99,9 +75,93 @@ def get_db():
 
     try:
         yield db
-
     finally:
         db.close()
+
+
+# =========================================================
+# PASSWORD FUNCTIONS
+# =========================================================
+
+def prepare_password(password: str) -> bytes:
+    """
+    Convert the password into a SHA-256 digest before
+    sending it to bcrypt.
+
+    This prevents bcrypt's 72-byte password limitation.
+    """
+
+    return hashlib.sha256(
+        password.encode("utf-8")
+    ).hexdigest().encode("utf-8")
+
+
+def hash_password(password: str) -> str:
+    """
+    Hash a password using SHA-256 + bcrypt.
+    """
+
+    password_bytes = prepare_password(password)
+
+    hashed = bcrypt.hashpw(
+        password_bytes,
+        bcrypt.gensalt()
+    )
+
+    return hashed.decode("utf-8")
+
+
+def verify_password(
+    password: str,
+    stored_hash: str
+) -> bool:
+    """
+    Verify a password against the stored bcrypt hash.
+
+    First checks the new SHA-256 + bcrypt format.
+
+    Then attempts the old direct-bcrypt format so
+    previously registered users are not unnecessarily
+    locked out.
+    """
+
+    # -----------------------------------------------------
+    # NEW PASSWORD FORMAT
+    # -----------------------------------------------------
+
+    try:
+        prepared_password = prepare_password(password)
+
+        if bcrypt.checkpw(
+            prepared_password,
+            stored_hash.encode("utf-8")
+        ):
+            return True
+
+    except Exception:
+        pass
+
+
+    # -----------------------------------------------------
+    # OLD PASSWORD FORMAT
+    # -----------------------------------------------------
+
+    try:
+        password_bytes = password.encode("utf-8")
+
+        if len(password_bytes) <= 72:
+
+            if bcrypt.checkpw(
+                password_bytes,
+                stored_hash.encode("utf-8")
+            ):
+                return True
+
+    except Exception:
+        pass
+
+
+    return False
 
 
 # =========================================================
@@ -125,13 +185,23 @@ def register(
             "error": "Email already registered"
         }
 
-    prepared_password = prepare_password(
-        user.password
-    )
 
-    hashed_password = pwd_context.hash(
-        prepared_password
-    )
+    try:
+
+        hashed_password = hash_password(
+            user.password
+        )
+
+    except Exception as e:
+
+        print(
+            f"Password hashing error: {e}"
+        )
+
+        return {
+            "error": "Unable to create account"
+        }
+
 
     new_user = User(
         username=user.username,
@@ -139,9 +209,25 @@ def register(
         hashed_password=hashed_password
     )
 
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
+
+    try:
+
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+    except Exception as e:
+
+        db.rollback()
+
+        print(
+            f"Registration database error: {e}"
+        )
+
+        return {
+            "error": "Unable to create account"
+        }
+
 
     return {
         "message": "User registered successfully",
@@ -165,26 +251,28 @@ def login(
         .first()
     )
 
+
     if not db_user:
         return {
             "error": "Invalid email or password"
         }
 
-    prepared_password = prepare_password(
-        user.password
-    )
 
-    if not pwd_context.verify(
-        prepared_password,
+    if not verify_password(
+        user.password,
         db_user.hashed_password
     ):
         return {
             "error": "Invalid email or password"
         }
 
+
     access_token = create_access_token(
-        data={"sub": db_user.email}
+        data={
+            "sub": db_user.email
+        }
     )
+
 
     return {
         "access_token": access_token,
@@ -219,23 +307,32 @@ def search(
 
     search_term = query["query"]
 
-    news_articles = fetch_news(search_term)
 
-    hn_articles = fetch_hackernews(search_term)
+    news_articles = fetch_news(
+        search_term
+    )
+
+    hn_articles = fetch_hackernews(
+        search_term
+    )
+
 
     all_articles = (
         news_articles + hn_articles
     )
+
 
     group_into_problems(
         search_term,
         db
     )
 
+
     problems = get_problems_with_articles(
         search_term,
         db
     )
+
 
     return {
         "query": search_term,
@@ -256,19 +353,25 @@ def chat(
     db: Session = Depends(get_db)
 ):
 
-    message = query.get("message")
+    message = query.get(
+        "message"
+    )
+
 
     if not message:
         return {
             "error": "Message is required"
         }
 
+
     history = query.get(
         "history",
         []
     )
 
+
     conversation_context = ""
+
 
     for item in history[-10:]:
 
@@ -282,6 +385,7 @@ def chat(
             "text",
             ""
         )
+
 
         conversation_context += (
             f"{role}: {text}\n"
@@ -299,6 +403,7 @@ def chat(
 
 
     problem_context = ""
+
 
     for problem in problems:
 
@@ -342,15 +447,18 @@ Instructions:
             contents=prompt
         )
 
+
         return {
             "response": response.text
         }
+
 
     except Exception as e:
 
         print(
             f"Chat error: {e}"
         )
+
 
         return {
             "error": "AI response failed"
@@ -372,7 +480,9 @@ def analyze_opportunity(
         "problem_id"
     )
 
+
     if not problem_id:
+
         return {
             "error": "Problem ID is required"
         }
@@ -388,6 +498,7 @@ def analyze_opportunity(
 
 
     if not problem:
+
         return {
             "error": "Problem not found"
         }
@@ -429,7 +540,9 @@ Rules:
 """
 
 
-    # Try Gemini up to 3 times if it temporarily returns 503
+    # -----------------------------------------------------
+    # TRY GEMINI UP TO 3 TIMES
+    # -----------------------------------------------------
 
     for attempt in range(3):
 
@@ -439,6 +552,7 @@ Rules:
                 model="gemini-3.6-flash",
                 contents=prompt
             )
+
 
             response_text = (
                 response.text.strip()
@@ -455,9 +569,13 @@ Rules:
                 )
 
 
-            start = response_text.find("{")
+            start = response_text.find(
+                "{"
+            )
 
-            end = response_text.rfind("}")
+            end = response_text.rfind(
+                "}"
+            )
 
 
             if start == -1 or end == -1:
@@ -486,14 +604,13 @@ Rules:
 
             error_message = str(e)
 
+
             print(
                 f"Opportunity analysis attempt "
                 f"{attempt + 1} failed: "
                 f"{error_message}"
             )
 
-
-            # Gemini temporary overload / unavailable
 
             if (
                 "503" in error_message
@@ -533,7 +650,9 @@ def assess_novelty(
         "problem_id"
     )
 
+
     if not problem_id:
+
         return {
             "error": "Problem ID is required"
         }
@@ -549,6 +668,7 @@ def assess_novelty(
 
 
     if not problem:
+
         return {
             "error": "Problem not found"
         }
@@ -609,9 +729,13 @@ Rules:
             )
 
 
-        start = response_text.find("{")
+        start = response_text.find(
+            "{"
+        )
 
-        end = response_text.rfind("}")
+        end = response_text.rfind(
+            "}"
+        )
 
 
         if start == -1 or end == -1:
@@ -642,6 +766,7 @@ Rules:
             f"Novelty assessment error: {e}"
         )
 
+
         return {
             "error": str(e)
         }
@@ -662,7 +787,9 @@ def problem_relationships(
         "problem_id"
     )
 
+
     if not problem_id:
+
         return {
             "error": "Problem ID is required"
         }
@@ -678,6 +805,7 @@ def problem_relationships(
 
 
     if not current_problem:
+
         return {
             "error": "Problem not found"
         }
@@ -722,10 +850,12 @@ def problem_relationships(
             f"{problem.summary or ''}"
         )
 
+
         words = re.findall(
             r"[a-zA-Z]{4,}",
             text.lower()
         )
+
 
         return set(
             word
@@ -769,13 +899,19 @@ def problem_relationships(
 
             common_words = (
                 current_words
-                .intersection(problem_words)
+                .intersection(
+                    problem_words
+                )
             )
+
 
             total_words = (
                 current_words
-                .union(problem_words)
+                .union(
+                    problem_words
+                )
             )
+
 
             similarity = (
                 len(common_words)
@@ -783,8 +919,7 @@ def problem_relationships(
             )
 
 
-        # Give a small boost when both
-        # problems came from the same query
+        # Same-query boost
 
         if (
             current_problem.query
