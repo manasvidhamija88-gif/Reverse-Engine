@@ -1,169 +1,302 @@
-import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 function LandingPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const steps = [
-    { num: "01", title: "Search a domain", desc: "Enter an industry or topic — agriculture, healthcare, education, anything you want to explore." },
-    { num: "02", title: "We gather evidence", desc: "News, research papers, forums, and open datasets are collected and cross-referenced for recurring patterns." },
-    { num: "03", title: "Discover real problems", desc: "Get ranked, evidence-backed problems with sources, severity, and potential opportunity areas." },
-  ]
+  const signals = [
+    "AGRICULTURE",
+    "HEALTHCARE",
+    "CLIMATE",
+    "EDUCATION",
+    "RURAL",
+  ];
 
   return (
-    <div className="min-h-screen bg-bg">
-      {/* Hero */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
-        className="flex flex-col items-center justify-center px-6 pt-24 pb-20 text-center"
-      >
-        <span className="inline-block text-xs tracking-widest uppercase text-accent border border-accent/30 rounded-full px-3 py-1 mb-6">
-          AI-Powered Problem Discovery
+    <div className="re-landing">
+
+      {/* BACKGROUND */}
+      <div className="re-landing-noise" />
+      <div className="re-landing-grid" />
+
+      {/* AMBIENT GLOW */}
+      <div className="re-landing-glow re-glow-left" />
+      <div className="re-landing-glow re-glow-right" />
+
+      {/* NAVBAR */}
+      <nav className="re-landing-nav">
+
+        <motion.button
+          className="re-landing-logo"
+          onClick={() => navigate("/")}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          REVERSE<span>ENGINE</span>
+        </motion.button>
+
+        <div className="re-landing-nav-links">
+          <span>DISCOVER</span>
+          <span>ANALYZE</span>
+          <span>SOLVE</span>
+
+          <button onClick={() => navigate("/login")}>
+            LOGIN ↗
+          </button>
+        </div>
+
+      </nav>
+
+      {/* HERO */}
+      <main className="re-landing-hero">
+
+        {/* LEFT CONTENT */}
+        <section className="re-landing-content">
+
+          <motion.div
+            className="re-landing-eyebrow"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            <span />
+            AI-POWERED PROBLEM DISCOVERY
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 1,
+              delay: 0.15,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+          >
+            Search for
+            <br />
+
+            <span className="re-heading-orange">
+              problems.
+            </span>
+
+            <br />
+
+            <span className="re-heading-outline">
+              Not answers.
+            </span>
+          </motion.h1>
+
+          <motion.p
+            className="re-landing-description"
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.45 }}
+          >
+            Reverse Engine analyzes real-world signals,
+            <br />
+            data and emerging patterns to uncover
+            <br />
+            problems worth solving.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.65 }}
+          >
+            <button
+              className="re-landing-button"
+              onClick={() => navigate("/register")}
+            >
+              <span />
+              <span />
+              <span />
+              <span />
+
+              <strong>START DISCOVERING</strong>
+              <b>↗</b>
+            </button>
+          </motion.div>
+
+        </section>
+
+
+        {/* AI VISUAL */}
+        <motion.section
+          className="re-discovery-visual"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: 1.2,
+            delay: 0.3,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+        >
+
+          {/* ORBIT SYSTEM */}
+          <div className="re-discovery-orbit orbit-one" />
+          <div className="re-discovery-orbit orbit-two" />
+          <div className="re-discovery-orbit orbit-three" />
+
+          {/* CENTER CORE */}
+          <div className="re-discovery-core">
+
+            <div className="re-core-glow" />
+
+            <div className="re-core-inner">
+              <span />
+              <span />
+              <span />
+              <span />
+            </div>
+
+          </div>
+
+
+          {/* SIGNAL NODES */}
+          <motion.div
+            className="re-discovery-node node-a"
+            animate={{ y: [-8, 8, -8] }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <i />
+            <span>HEALTHCARE</span>
+          </motion.div>
+
+          <motion.div
+            className="re-discovery-node node-b"
+            animate={{ y: [8, -8, 8] }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <i />
+            <span>AGRICULTURE</span>
+          </motion.div>
+
+          <motion.div
+            className="re-discovery-node node-c"
+            animate={{ y: [-6, 6, -6] }}
+            transition={{
+              duration: 4.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <i />
+            <span>CLIMATE</span>
+          </motion.div>
+
+          <motion.div
+            className="re-discovery-node node-d"
+            animate={{ y: [5, -5, 5] }}
+            transition={{
+              duration: 5.5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <i />
+            <span>EDUCATION</span>
+          </motion.div>
+
+
+          {/* CONNECTION LINES */}
+          <div className="re-discovery-line line-a" />
+          <div className="re-discovery-line line-b" />
+          <div className="re-discovery-line line-c" />
+          <div className="re-discovery-line line-d" />
+
+
+          {/* FLOATING INFORMATION */}
+          <motion.div
+            className="re-discovery-card card-a"
+            animate={{ y: [-5, 5, -5] }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <small>LIVE SIGNAL</small>
+            <strong>24</strong>
+            <span>PATTERNS DETECTED</span>
+          </motion.div>
+
+
+          <motion.div
+            className="re-discovery-card card-b"
+            animate={{ y: [5, -5, 5] }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          >
+            <small>AI CONFIDENCE</small>
+            <strong>82%</strong>
+            <span>HIGH RELEVANCE</span>
+          </motion.div>
+
+
+          {/* SCANNING RING */}
+          <div className="re-discovery-scan" />
+
+          {/* RANDOM PARTICLES */}
+          <span className="re-particle p1" />
+          <span className="re-particle p2" />
+          <span className="re-particle p3" />
+          <span className="re-particle p4" />
+          <span className="re-particle p5" />
+          <span className="re-particle p6" />
+
+        </motion.section>
+
+      </main>
+
+
+      {/* SIGNAL TICKER */}
+      <div className="re-signal-ticker">
+
+        <div className="re-ticker-track">
+
+          {[...signals, ...signals].map((signal, index) => (
+            <div key={index}>
+              <span>✦</span>
+              {signal}
+            </div>
+          ))}
+
+        </div>
+
+      </div>
+
+
+      {/* BOTTOM INFO */}
+      <div className="re-landing-bottom">
+
+        <span>
+          01 / REVERSE ENGINE
         </span>
 
-        <h1 className="text-5xl md:text-6xl font-semibold text-text tracking-tight mb-4 max-w-3xl">
-          Reverse Engine
-        </h1>
+        <span>
+          FIND THE PROBLEM
+        </span>
 
-        <p className="text-lg text-text-muted mb-10 leading-relaxed max-w-xl">
-          Search for problems, not answers. Reverse Engine analyzes real-world
-          data to surface the pain points and opportunities worth solving.
-        </p>
+        <span>
+          SCROLL TO EXPLORE ↓
+        </span>
 
-        <div className="flex items-center justify-center gap-3">
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => navigate("/register")}
-            className="bg-accent hover:bg-accent-hover text-bg font-medium px-6 py-3 rounded-md transition-colors"
-          >
-            Get Started
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => navigate("/login")}
-            className="border border-border hover:border-accent text-text px-6 py-3 rounded-md transition-colors"
-          >
-            Log In
-          </motion.button>
-        </div>
-      </motion.div>
-
-      {/* How it works */}
-      <div className="max-w-5xl mx-auto px-6 py-20 border-t border-border">
-        <motion.h2
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-2xl font-semibold text-text text-center mb-2"
-        >
-          How it works
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-text-muted text-center mb-14"
-        >
-          From a single search term to evidence-backed problems worth solving.
-        </motion.p>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {steps.map((step, i) => (
-            <motion.div
-              key={step.num}
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.15 }}
-              whileHover={{ y: -4, borderColor: "var(--color-accent)" }}
-              className="border border-border rounded-lg p-6"
-            >
-              <span className="text-accent text-sm font-mono mb-3 block">{step.num}</span>
-              <h3 className="text-text font-medium mb-2">{step.title}</h3>
-              <p className="text-text-muted text-sm leading-relaxed">{step.desc}</p>
-            </motion.div>
-          ))}
-        </div>
       </div>
 
-      {/* Sample problem preview */}
-      <div className="max-w-3xl mx-auto px-6 py-20 border-t border-border">
-        <motion.h2
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-2xl font-semibold text-text text-center mb-2"
-        >
-          What you'll find
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-text-muted text-center mb-10"
-        >
-          A preview of how a discovered problem looks.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 25 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          whileHover={{ y: -4, borderColor: "var(--color-accent)" }}
-          className="bg-surface border border-border rounded-lg p-6"
-        >
-          <span className="inline-block text-xs tracking-widest uppercase text-accent mb-3">
-            Agriculture
-          </span>
-          <h3 className="text-xl font-semibold text-text mb-2">
-            Water Scarcity in Agriculture
-          </h3>
-          <p className="text-text-muted text-sm leading-relaxed mb-4">
-            Farmers across multiple regions report declining irrigation
-            access, with research and government data confirming reduced
-            agricultural productivity as a result.
-          </p>
-          <div className="flex items-center gap-4 text-xs text-text-muted">
-            <span>4 sources</span>
-            <span>•</span>
-            <span>High severity</span>
-            <span>•</span>
-            <span>82% confidence</span>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Footer CTA */}
-      <div className="border-t border-border px-6 py-16 text-center">
-        <motion.h2
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-2xl font-semibold text-text mb-6"
-        >
-          Start discovering problems worth solving.
-        </motion.h2>
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => navigate("/register")}
-          className="bg-accent hover:bg-accent-hover text-bg font-medium px-6 py-3 rounded-md transition-colors"
-        >
-          Get Started — It's Free
-        </motion.button>
-      </div>
     </div>
-  )
+  );
 }
 
-export default LandingPage
+export default LandingPage;

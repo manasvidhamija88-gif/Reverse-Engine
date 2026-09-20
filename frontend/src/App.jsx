@@ -4,6 +4,9 @@ import LoginPage from './LoginPage'
 import RegisterPage from './RegisterPage'
 import DashboardPage from './DashboardPage'
 import SearchPage from './SearchPage'
+import './App.css'
+import ChatPage from "./ChatPage";
+import OpportunityPage from "./OpportunityPage";
 
 function App() {
   return (
@@ -14,7 +17,10 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="*" element={<Navigate to="/" />} />
+        <Route path="/chat" element={<ChatPage />} />
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/opportunity" element={<OpportunityPage />}
+/>
       </Routes>
     </BrowserRouter>
   )

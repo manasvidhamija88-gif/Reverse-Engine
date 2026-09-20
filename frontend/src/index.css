@@ -18,3 +18,1531 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans);
 }
+
+/* =========================================================
+   REVERSE ENGINE AI CHAT
+   ========================================================= */
+
+.re-chat-page {
+  min-height: 100vh;
+  background: #080808;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
+  font-family: inherit;
+}
+
+.re-chat-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(255, 106, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 106, 0, 0.025) 1px, transparent 1px);
+  background-size: 70px 70px;
+}
+
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+.re-chat-nav {
+  height: 76px;
+  padding: 0 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #222;
+  background: rgba(8, 8, 8, 0.92);
+  position: relative;
+  z-index: 5;
+}
+
+.re-chat-logo {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.re-chat-logo span {
+  color: #ff6a00;
+}
+
+.re-chat-dashboard {
+  background: transparent;
+  border: 1px solid #393939;
+  color: #aaa;
+  padding: 10px 18px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.re-chat-dashboard:hover {
+  color: #ff6a00;
+  border-color: #ff6a00;
+}
+
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.re-chat-main {
+  width: min(1100px, 92%);
+  margin: 0 auto;
+  padding: 55px 0 40px;
+  position: relative;
+  z-index: 2;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.re-chat-header {
+  margin-bottom: 30px;
+}
+
+.re-chat-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #777;
+  font-size: 10px;
+  letter-spacing: 3px;
+  margin-bottom: 16px;
+}
+
+.re-chat-dot {
+  width: 6px;
+  height: 6px;
+  background: #ff6a00;
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(255, 106, 0, 0.8);
+}
+
+.re-chat-header h1 {
+  margin: 0;
+  font-size: clamp(42px, 5vw, 68px);
+  line-height: 0.95;
+  letter-spacing: -2px;
+  font-weight: 700;
+}
+
+.re-chat-header h1 span {
+  color: #ff6a00;
+}
+
+.re-chat-header p {
+  margin-top: 18px;
+  color: #777;
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   CHAT CONTAINER
+   ========================================================= */
+
+.re-chat-container {
+  border: 1px solid #252525;
+  background: rgba(13, 13, 13, 0.96);
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.35);
+}
+
+.re-chat-messages {
+  height: 560px;
+  overflow-y: auto;
+  padding: 30px;
+  scroll-behavior: smooth;
+}
+
+
+/* scrollbar */
+
+.re-chat-messages::-webkit-scrollbar {
+  width: 7px;
+}
+
+.re-chat-messages::-webkit-scrollbar-track {
+  background: #0b0b0b;
+}
+
+.re-chat-messages::-webkit-scrollbar-thumb {
+  background: #303030;
+}
+
+.re-chat-messages::-webkit-scrollbar-thumb:hover {
+  background: #ff6a00;
+}
+
+
+/* =========================================================
+   MESSAGE ROW
+   ========================================================= */
+
+.re-message-row {
+  display: flex;
+  width: 100%;
+  margin-bottom: 25px;
+}
+
+.re-message-ai {
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.re-message-user {
+  justify-content: flex-end;
+}
+
+
+/* =========================================================
+   AI AVATAR
+   ========================================================= */
+
+.re-ai-avatar {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ff6a00;
+  color: #000;
+
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 1px;
+
+  margin-top: 2px;
+}
+
+
+/* =========================================================
+   AI MESSAGE
+   ========================================================= */
+
+.re-ai-message {
+  max-width: 88%;
+  background: #111;
+  border: 1px solid #292929;
+  padding: 20px;
+  color: #ddd;
+  line-height: 1.6;
+}
+
+
+/* =========================================================
+   AI INTRO / NORMAL TEXT
+   ========================================================= */
+
+.re-ai-intro {
+  color: #d7d7d7;
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 18px;
+}
+
+.re-ai-text {
+  color: #d7d7d7;
+  font-size: 15px;
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+
+/* =========================================================
+   PROBLEM RESPONSE
+   ========================================================= */
+
+.re-ai-response {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+
+/* =========================================================
+   PROBLEM CARD
+   ========================================================= */
+
+.re-problem-card {
+  display: flex;
+  gap: 16px;
+  padding: 17px;
+  background: #0c0c0c;
+  border: 1px solid #252525;
+  transition: all 0.25s ease;
+}
+
+.re-problem-card:hover {
+  border-color: rgba(255, 106, 0, 0.65);
+  transform: translateX(3px);
+  background: #101010;
+}
+
+
+/* =========================================================
+   PROBLEM NUMBER
+   ========================================================= */
+
+.re-problem-number {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ff6a00;
+  color: #000;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   PROBLEM CONTENT
+   ========================================================= */
+
+.re-problem-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.re-problem-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.re-problem-top h3 {
+  margin: 0;
+  color: #f2f2f2;
+  font-size: 16px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   SEVERITY
+   ========================================================= */
+
+.re-problem-severity {
+  flex-shrink: 0;
+  padding: 5px 9px;
+  font-size: 8px;
+  letter-spacing: 1px;
+  font-weight: 800;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+.severity-high {
+  color: #ff6a00;
+  border-color: #ff6a00;
+}
+
+.severity-medium {
+  color: #d8a13b;
+  border-color: #d8a13b;
+}
+
+.severity-low {
+  color: #777;
+  border-color: #444;
+}
+
+
+/* =========================================================
+   SUMMARY
+   ========================================================= */
+
+.re-problem-summary {
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid #202020;
+}
+
+.re-problem-summary span {
+  display: block;
+  color: #666;
+  font-size: 8px;
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+}
+
+.re-problem-summary p {
+  margin: 0;
+  color: #999;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+
+/* =========================================================
+   EXTRA AI TEXT
+   ========================================================= */
+
+.re-problem-extra {
+  margin-top: 10px;
+}
+
+.re-problem-extra p {
+  margin: 5px 0;
+  color: #aaa;
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   USER MESSAGE
+   ========================================================= */
+
+.re-user-message {
+  max-width: 70%;
+  background: #ff6a00;
+  color: #050505;
+  padding: 13px 17px;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.re-user-text {
+  white-space: pre-wrap;
+}
+
+
+/* =========================================================
+   THINKING ANIMATION
+   ========================================================= */
+
+.re-thinking {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 15px 18px;
+}
+
+.re-thinking span {
+  width: 5px;
+  height: 5px;
+  background: #ff6a00;
+  border-radius: 50%;
+  animation: reThinking 1.2s infinite ease-in-out;
+}
+
+.re-thinking span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.re-thinking span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.re-thinking p {
+  margin: 0 0 0 8px;
+  color: #777;
+  font-size: 11px;
+}
+
+@keyframes reThinking {
+  0%,
+  60%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+
+.re-chat-input-area {
+  display: flex;
+  gap: 10px;
+  padding: 18px;
+  border-top: 1px solid #242424;
+  background: #0b0b0b;
+}
+
+.re-chat-input-area textarea {
+  flex: 1;
+  min-height: 48px;
+  max-height: 130px;
+  resize: vertical;
+
+  background: #111;
+  border: 1px solid #292929;
+  outline: none;
+
+  color: #fff;
+  padding: 14px 16px;
+
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.re-chat-input-area textarea::placeholder {
+  color: #555;
+}
+
+.re-chat-input-area textarea:focus {
+  border-color: #ff6a00;
+}
+
+.re-chat-input-area button {
+  width: 105px;
+  border: none;
+  background: #ff6a00;
+  color: #000;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.re-chat-input-area button:hover {
+  background: #ff7b20;
+}
+
+.re-chat-input-area button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+/* =========================================================
+   HINT
+   ========================================================= */
+
+.re-chat-hint {
+  padding: 0 18px 15px;
+  color: #444;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .re-chat-nav {
+    padding: 0 20px;
+  }
+
+  .re-chat-logo {
+    font-size: 14px;
+  }
+
+  .re-chat-dashboard {
+    padding: 8px 12px;
+  }
+
+  .re-chat-main {
+    width: 94%;
+    padding-top: 35px;
+  }
+
+  .re-chat-header h1 {
+    font-size: 42px;
+  }
+
+  .re-chat-messages {
+    height: 520px;
+    padding: 18px;
+  }
+
+  .re-ai-message {
+    max-width: 92%;
+    padding: 14px;
+  }
+
+  .re-user-message {
+    max-width: 82%;
+  }
+
+  .re-problem-top {
+    flex-direction: column;
+  }
+
+  .re-problem-severity {
+    align-self: flex-start;
+  }
+
+  .re-chat-input-area {
+    padding: 12px;
+  }
+
+  .re-chat-input-area button {
+    width: 80px;
+  }
+}
+.re-analyze-opportunity-btn {
+  margin-top: 18px;
+  padding: 11px 18px;
+  background: transparent;
+  color: #ff6a00;
+  border: 1px solid #ff6a00;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.re-analyze-opportunity-btn:hover {
+  background: #ff6a00;
+  color: #000;
+  transform: translateX(4px);
+}
+.re-opportunity-action {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid #252525;
+}
+
+.re-analyze-opportunity-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 11px 18px;
+  background: transparent;
+  color: #ff6a00;
+  border: 1px solid #ff6a00;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.re-analyze-opportunity-btn:hover {
+  background: #ff6a00;
+  color: #000;
+  transform: translateX(4px);
+}
+/* =========================================================
+   AI OPPORTUNITY ENGINE
+   ========================================================= */
+
+.re-opportunity-page {
+  min-height: 100vh;
+  background: #080808;
+  color: #fff;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.re-opportunity-page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+
+  background:
+    linear-gradient(rgba(255, 106, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 106, 0, 0.025) 1px, transparent 1px);
+
+  background-size: 70px 70px;
+}
+
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+.re-opportunity-nav {
+  height: 76px;
+  padding: 0 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #242424;
+  background: rgba(8, 8, 8, 0.94);
+
+  position: relative;
+  z-index: 5;
+}
+
+.re-opportunity-logo {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.re-opportunity-logo span {
+  color: #ff6a00;
+}
+
+.re-opportunity-back {
+  background: transparent;
+  color: #999;
+
+  border: 1px solid #333;
+
+  padding: 10px 17px;
+
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.re-opportunity-back:hover {
+  color: #ff6a00;
+  border-color: #ff6a00;
+}
+
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.re-opportunity-main {
+  width: min(1050px, 92%);
+  margin: 0 auto;
+
+  padding: 70px 0 100px;
+
+  position: relative;
+  z-index: 2;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.re-opportunity-label {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 7px 12px;
+
+  border: 1px solid rgba(255, 106, 0, 0.35);
+
+  color: #ff6a00;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+
+  margin-bottom: 22px;
+}
+
+.re-opportunity-main > h1 {
+  max-width: 900px;
+
+  margin: 0;
+
+  font-size: clamp(42px, 6vw, 78px);
+  line-height: 0.98;
+
+  letter-spacing: -3px;
+  font-weight: 700;
+}
+
+.re-opportunity-meta {
+  display: flex;
+  gap: 10px;
+
+  margin-top: 25px;
+}
+
+.re-opportunity-meta span {
+  padding: 7px 11px;
+
+  border: 1px solid #333;
+
+  color: #888;
+
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+
+/* =========================================================
+   PROBLEM SECTION
+   ========================================================= */
+
+.re-opportunity-problem {
+  margin-top: 45px;
+
+  padding: 25px;
+
+  border-left: 2px solid #ff6a00;
+
+  background: #0e0e0e;
+  border-top: 1px solid #222;
+  border-right: 1px solid #222;
+  border-bottom: 1px solid #222;
+}
+
+.re-opportunity-problem > div {
+  color: #ff6a00;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+
+  margin-bottom: 12px;
+}
+
+.re-opportunity-problem p {
+  margin: 0;
+
+  color: #999;
+
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+
+/* =========================================================
+   ANALYZE BUTTON
+   ========================================================= */
+
+.re-analyze-button {
+  margin-top: 35px;
+
+  padding: 16px 24px;
+
+  background: #ff6a00;
+  color: #000;
+
+  border: none;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+
+  cursor: pointer;
+
+  transition: 0.25s ease;
+}
+
+.re-analyze-button:hover {
+  background: #ff7b20;
+  transform: translateX(5px);
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.re-opportunity-loading {
+  margin-top: 40px;
+
+  min-height: 180px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  gap: 20px;
+
+  border: 1px solid #242424;
+  background: #0d0d0d;
+}
+
+.re-loading-orbit {
+  width: 45px;
+  height: 45px;
+
+  border: 2px solid #222;
+  border-top-color: #ff6a00;
+
+  border-radius: 50%;
+
+  animation: reOpportunitySpin 1s linear infinite;
+}
+
+.re-opportunity-loading p {
+  margin: 0;
+
+  color: #777;
+
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+@keyframes reOpportunitySpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.re-opportunity-error {
+  margin-top: 30px;
+
+  padding: 16px 20px;
+
+  border: 1px solid rgba(255, 60, 60, 0.3);
+
+  background: rgba(255, 60, 60, 0.05);
+
+  color: #ff7777;
+
+  font-size: 13px;
+}
+
+
+/* =========================================================
+   RESULTS
+   ========================================================= */
+
+.re-opportunity-results {
+  margin-top: 45px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.re-opportunity-results section {
+  display: grid;
+  grid-template-columns: 65px 1fr;
+  gap: 25px;
+
+  padding: 30px;
+
+  background: #0d0d0d;
+
+  border: 1px solid #202020;
+
+  position: relative;
+
+  transition: 0.3s ease;
+}
+
+.re-opportunity-results section:hover {
+  border-color: rgba(255, 106, 0, 0.45);
+
+  background: #101010;
+
+  transform: translateX(5px);
+}
+
+.re-opportunity-results section > span {
+  color: #ff6a00;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+
+  padding-top: 5px;
+}
+
+.re-opportunity-results section h2 {
+  margin: 0 0 12px;
+
+  color: #f3f3f3;
+
+  font-size: 22px;
+  font-weight: 600;
+
+  letter-spacing: -0.5px;
+}
+
+.re-opportunity-results section p {
+  margin: 0;
+
+  max-width: 780px;
+
+  color: #999;
+
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+
+/* =========================================================
+   STARTUP IDEA HIGHLIGHT
+   ========================================================= */
+
+.re-opportunity-results .re-opportunity-highlight {
+  background:
+    linear-gradient(
+      100deg,
+      rgba(255, 106, 0, 0.09),
+      rgba(255, 106, 0, 0.015)
+    );
+
+  border-color: rgba(255, 106, 0, 0.35);
+
+  padding: 38px 30px;
+}
+
+.re-opportunity-highlight h2 {
+  color: #ff6a00 !important;
+  font-size: 28px !important;
+}
+
+.re-opportunity-highlight p {
+  color: #d0d0d0 !important;
+  font-size: 16px !important;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.re-opportunity-empty {
+  min-height: 100vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  gap: 20px;
+
+  background: #080808;
+}
+
+.re-opportunity-empty h2 {
+  color: #fff;
+}
+
+.re-opportunity-empty button {
+  padding: 12px 20px;
+
+  background: #ff6a00;
+  border: none;
+
+  color: #000;
+
+  font-weight: 800;
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+  .re-opportunity-nav {
+    padding: 0 20px;
+  }
+
+  .re-opportunity-logo {
+    font-size: 14px;
+  }
+
+  .re-opportunity-main {
+    width: 92%;
+    padding-top: 45px;
+  }
+
+  .re-opportunity-main > h1 {
+    font-size: 44px;
+    letter-spacing: -2px;
+  }
+
+  .re-opportunity-results section {
+    grid-template-columns: 40px 1fr;
+    gap: 15px;
+
+    padding: 22px 18px;
+  }
+
+  .re-opportunity-results section h2 {
+    font-size: 19px;
+  }
+
+  .re-opportunity-results section p {
+    font-size: 13px;
+  }
+
+  .re-opportunity-results .re-opportunity-highlight {
+    padding: 25px 18px;
+  }
+}
+/* =========================================================
+   NOVELTY ASSESSMENT
+   ========================================================= */
+
+.re-novelty-button {
+  margin-top: 15px;
+  margin-left: 10px;
+  padding: 16px 24px;
+
+  background: transparent;
+  color: #ff6a00;
+
+  border: 1px solid #ff6a00;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.re-novelty-button:hover {
+  background: #ff6a00;
+  color: #000;
+  transform: translateX(5px);
+}
+
+.re-novelty-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.re-novelty-panel {
+  margin-top: 45px;
+  padding: 30px;
+
+  background: #0d0d0d;
+  border: 1px solid #242424;
+}
+
+.re-novelty-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding-bottom: 25px;
+  border-bottom: 1px solid #242424;
+}
+
+.re-novelty-header span,
+.re-novelty-assessment > span,
+.re-novelty-metric > span {
+  color: #777;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.re-novelty-header h2 {
+  margin: 8px 0 0;
+
+  font-size: 30px;
+  color: #fff;
+}
+
+.re-novelty-disclaimer {
+  color: #555;
+  font-size: 9px;
+  text-align: right;
+}
+
+.re-novelty-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+
+  margin-top: 30px;
+}
+
+.re-novelty-metric {
+  padding: 20px;
+
+  background: #101010;
+  border: 1px solid #222;
+}
+
+.re-novelty-metric strong {
+  display: block;
+
+  margin: 10px 0 14px;
+
+  color: #ff6a00;
+  font-size: 32px;
+}
+
+.re-novelty-bar {
+  height: 4px;
+  background: #252525;
+}
+
+.re-novelty-bar div {
+  height: 100%;
+  background: #ff6a00;
+
+  transition: width 0.8s ease;
+}
+
+.re-novelty-assessment {
+  margin-top: 20px;
+  padding: 22px;
+
+  border-left: 2px solid #ff6a00;
+  background: #101010;
+}
+
+.re-novelty-assessment p {
+  margin: 10px 0 0;
+
+  color: #aaa;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+@media (max-width: 700px) {
+  .re-novelty-button {
+    margin-left: 0;
+  }
+
+  .re-novelty-header {
+    flex-direction: column;
+  }
+
+  .re-novelty-disclaimer {
+    text-align: left;
+  }
+
+  .re-novelty-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+/* =========================================================
+   PROBLEM RELATIONSHIP MAP
+   ========================================================= */
+
+.re-relationship-button {
+  margin-top: 15px;
+  margin-left: 10px;
+  padding: 16px 24px;
+
+  background: transparent;
+  color: #ff6a00;
+
+  border: 1px solid #ff6a00;
+
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+
+  cursor: pointer;
+  transition: 0.25s ease;
+}
+
+.re-relationship-button:hover {
+  background: #ff6a00;
+  color: #000;
+  transform: translateX(5px);
+}
+
+.re-relationship-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* PANEL */
+
+.re-relationship-panel {
+  margin-top: 45px;
+  padding: 30px;
+
+  background: #0d0d0d;
+  border: 1px solid #242424;
+}
+
+
+/* HEADER */
+
+.re-relationship-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  padding-bottom: 25px;
+  border-bottom: 1px solid #242424;
+}
+
+.re-relationship-header span {
+  color: #777;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.re-relationship-header h2 {
+  margin: 8px 0 0;
+
+  color: #fff;
+  font-size: 30px;
+}
+
+.re-relationship-count {
+  color: #ff6a00;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+
+/* MAP */
+
+.re-relationship-map {
+  margin-top: 30px;
+}
+
+
+/* CURRENT PROBLEM */
+
+.re-relationship-center {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 35px;
+}
+
+.re-relationship-node-main {
+  width: min(500px, 100%);
+
+  padding: 25px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 106, 0, 0.12),
+      rgba(255, 106, 0, 0.02)
+    );
+
+  border: 1px solid rgba(255, 106, 0, 0.55);
+
+  text-align: center;
+
+  position: relative;
+}
+
+.re-relationship-node-main::after {
+  content: "";
+
+  position: absolute;
+
+  left: 50%;
+  bottom: -36px;
+
+  width: 1px;
+  height: 35px;
+
+  background: #ff6a00;
+}
+
+.re-relationship-node-main span {
+  color: #ff6a00;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.re-relationship-node-main h3 {
+  margin: 12px 0;
+
+  color: #fff;
+
+  font-size: 20px;
+  line-height: 1.4;
+}
+
+.re-relationship-node-main small {
+  color: #888;
+
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+
+/* RELATED LIST */
+
+.re-relationship-list {
+  display: grid;
+
+  grid-template-columns: repeat(2, 1fr);
+
+  gap: 18px;
+
+  position: relative;
+}
+
+
+/* CONNECTION CARD */
+
+.re-relationship-card {
+  position: relative;
+}
+
+.re-relationship-node {
+  min-height: 150px;
+
+  padding: 20px;
+
+  display: flex;
+  gap: 18px;
+
+  background: #101010;
+
+  border: 1px solid #242424;
+
+  transition: 0.25s ease;
+}
+
+.re-relationship-node:hover {
+  border-color: rgba(255, 106, 0, 0.45);
+
+  transform: translateY(-3px);
+}
+
+
+/* CONNECTION LINE */
+
+.re-relationship-line {
+  position: absolute;
+
+  left: 50%;
+  top: -18px;
+
+  width: 1px;
+  height: 18px;
+
+  background: #333;
+}
+
+
+/* SCORE */
+
+.re-relationship-score {
+  min-width: 55px;
+  height: 55px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #ff6a00;
+
+  color: #ff6a00;
+
+  font-size: 12px;
+  font-weight: 900;
+}
+
+
+/* INFO */
+
+.re-relationship-info {
+  flex: 1;
+}
+
+.re-relationship-info h3 {
+  margin: 0 0 8px;
+
+  color: #eee;
+
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.re-relationship-info span {
+  color: #777;
+
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.re-relationship-info p {
+  margin: 10px 0 0;
+
+  color: #888;
+
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+
+/* EMPTY STATE */
+
+.re-no-relationships {
+  padding: 30px;
+
+  text-align: center;
+
+  color: #777;
+
+  border: 1px solid #242424;
+  background: #101010;
+
+  font-size: 13px;
+}
+
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+  .re-relationship-button {
+    margin-left: 0;
+  }
+
+  .re-relationship-panel {
+    padding: 20px;
+  }
+
+  .re-relationship-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .re-relationship-list {
+    grid-template-columns: 1fr;
+  }
+
+  .re-relationship-node-main h3 {
+    font-size: 17px;
+  }
+
+}

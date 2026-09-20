@@ -1,4 +1,7 @@
-const API_URL = "https://reverse-engine.onrender.com";
+const API_URL =
+  window.location.hostname === "localhost"
+    ? "http://127.0.0.1:8000"
+    : "https://reverse-engine.onrender.com";
 
 export async function registerUser(username, email, password) {
   const response = await fetch(`${API_URL}/register`, {
